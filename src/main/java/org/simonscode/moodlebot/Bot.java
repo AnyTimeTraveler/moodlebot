@@ -1,21 +1,18 @@
 package org.simonscode.moodlebot;
 
+import org.simonscode.telegrammenulibrary.UpdateHook;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 public class Bot extends TelegramLongPollingBot {
 
+    public Bot() {
+
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
-        final File execute;
-        try {
-            execute = execute(new GetFile());
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+        UpdateHook.onUpdateReceived(this, update);
     }
 
     @Override
