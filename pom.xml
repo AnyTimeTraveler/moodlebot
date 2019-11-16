@@ -197,7 +197,7 @@
                 </executions>
                 <configuration>
                     <rules>
-                        <DependencyConvergence />
+                        <DependencyConvergence/>
                     </rules>
                 </configuration>
             </plugin>
@@ -218,6 +218,21 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <release>${java.version}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.10</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-sourcepath</arg>
+                        <arg>
+                            ${project.basedir}/src/main/java${path.separator}${project.basedir}/target/generated-sources/annotations${path.separator}/
+                        </arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
         </plugins>
@@ -259,9 +274,13 @@
         </dependency>
         <dependency>
             <groupId>org.simonscode</groupId>
-            <artifactId>telegrammenulibrary</artifactId>
+            <artifactId>telegram-menu-library</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.simonscode</groupId>
+            <artifactId>moodleapiclient</artifactId>
             <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

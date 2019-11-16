@@ -3,4 +3,4 @@
 *.ipr
 *.iml
 /target/
-
+*json
