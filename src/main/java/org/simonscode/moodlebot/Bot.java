@@ -1,6 +1,6 @@
 package org.simonscode.moodlebot;
 
-import org.simonscode.moodleapi.Requests;
+import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodlebot.callbacks.AssignmentsCallback;
 import org.simonscode.moodlebot.callbacks.CoursesCallback;
 import org.simonscode.moodlebot.callbacks.LogoutCallback;
@@ -86,8 +86,8 @@ public class Bot extends TelegramLongPollingBot {
                 }
                 try {
                     UserData userdata = new UserData();
-                    userdata.setToken(Requests.getToken(parts[1], parts[2]));
-                    userdata.setUserInfo(Requests.getUserInfo(userdata.getToken()));
+                    userdata.setToken(MoodleAPI.getToken(parts[1], parts[2]));
+                    userdata.setUserInfo(MoodleAPI.getUserInfo(userdata.getToken()));
                     reply(message, (userdata.getToken() != null && !userdata.getToken().isEmpty()) ? "Login successful!" : "Login failed!");
                     State.instance.users.put(message.getFrom().getId(), userdata);
                 } catch (Exception e) {

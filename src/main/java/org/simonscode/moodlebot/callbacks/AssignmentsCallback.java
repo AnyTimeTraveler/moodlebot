@@ -1,7 +1,7 @@
 package org.simonscode.moodlebot.callbacks;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.simonscode.moodleapi.Requests;
+import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodleapi.objects.assignment.AssignmentReply;
 import org.simonscode.moodleapi.objects.assignment.AssignmentSummary;
 import org.simonscode.moodleapi.objects.assignment.CourseStub;
@@ -34,14 +34,14 @@ public class AssignmentsCallback implements CallbackAction {
         VerticalMenu menu = new VerticalMenu();
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         try {
-            Course[] courses = Requests.getCourses(userData.getToken(), userData.getUserInfo().getUserid());
+            Course[] courses = MoodleAPI.getCourses(userData.getToken(), userData.getUserInfo().getUserid());
             if (courses != null) {
                 final StringBuilder sb = new StringBuilder();
                 sb.append("Assignments for ");
                 sb.append(userData.getUserInfo().getFullname());
                 sb.append(":\n\n");
                 List<Long> courseIds = Arrays.stream(courses).mapToLong(Course::getId).boxed().collect(Collectors.toList());
-                final AssignmentReply assignments = Requests.getAssignments(userData.getToken(), courseIds);
+                final AssignmentReply assignments = MoodleAPI.getAssignments(userData.getToken(), courseIds);
                 for (CourseStub courseStub : assignments.getCourses()) {
                     long current = System.currentTimeMillis();
                     final List<AssignmentSummary> relevantAssignments = Arrays.stream(courseStub.getAssignments())

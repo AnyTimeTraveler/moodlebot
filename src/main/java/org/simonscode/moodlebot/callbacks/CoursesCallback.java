@@ -1,7 +1,7 @@
 package org.simonscode.moodlebot.callbacks;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.simonscode.moodleapi.Requests;
+import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodleapi.objects.course.Course;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
@@ -26,7 +26,7 @@ public class CoursesCallback implements CallbackAction {
         SimpleMenu menu = new SimpleMenu();
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         try {
-            Course[] courses = Requests.getCourses(userData.getToken(), userData.getUserInfo().getUserid());
+            Course[] courses = MoodleAPI.getCourses(userData.getToken(), userData.getUserInfo().getUserid());
             if (courses != null) {
                 menu.setText((onlyShowFavorites ? "Favorite " : "") + "Courses for " + userData.getUserInfo().getFullname());
                 for (Course course : courses) {

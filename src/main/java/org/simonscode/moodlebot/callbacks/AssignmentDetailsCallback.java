@@ -1,7 +1,7 @@
 package org.simonscode.moodlebot.callbacks;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.simonscode.moodleapi.Requests;
+import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodleapi.objects.assignment.AssignmentStatus;
 import org.simonscode.moodleapi.objects.assignment.AssignmentSummary;
 import org.simonscode.moodlebot.State;
@@ -30,7 +30,7 @@ public class AssignmentDetailsCallback implements CallbackAction {
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         AssignmentStatus assignmentStatus = null;
         try {
-            assignmentStatus = Requests.getAssignmentStatus(userData.getToken(), userData.getUserInfo().getUserid(), assignment.getId());
+            assignmentStatus = MoodleAPI.getAssignmentStatus(userData.getToken(), userData.getUserInfo().getUserid(), assignment.getId());
         } catch (UnirestException e) {
             e.printStackTrace();
         }
