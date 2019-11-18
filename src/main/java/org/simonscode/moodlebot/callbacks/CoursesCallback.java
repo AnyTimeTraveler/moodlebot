@@ -5,24 +5,31 @@ import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodleapi.objects.course.Course;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
-import org.simonscode.telegrammenulibrary.CallbackAction;
+import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.GotoCallback;
 import org.simonscode.telegrammenulibrary.SimpleMenu;
+import org.telegram.telegrambots.meta.api.methods.ActionType;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class CoursesCallback implements CallbackAction {
-    private final CallbackAction mainMenuCallback;
+public class CoursesCallback implements Callback {
+    private final Callback mainMenuCallback;
     private final boolean onlyShowFavorites;
 
-    public CoursesCallback(CallbackAction mainMenuCallback, boolean onlyShowFavorites) {
+    public CoursesCallback(Callback mainMenuCallback, boolean onlyShowFavorites) {
         this.mainMenuCallback = mainMenuCallback;
         this.onlyShowFavorites = onlyShowFavorites;
     }
 
     @Override
     public void execute(AbsSender bot, CallbackQuery callbackQuery) {
+        try {
+            bot.execute(new SendChatAction().setChatId(callbackQuery.getMessage().getChatId()).setAction(ActionType.TYPING));
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
         SimpleMenu menu = new SimpleMenu();
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         try {

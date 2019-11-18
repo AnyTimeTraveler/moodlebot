@@ -3,7 +3,7 @@ package org.simonscode.moodlebot.reminders.callbacks;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.reminders.ReminderManager;
-import org.simonscode.telegrammenulibrary.CallbackAction;
+import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -14,13 +14,13 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-public class SetReminderCallback implements CallbackAction {
-    private final CallbackAction assignmentDetailsCallback;
+public class SetReminderCallback implements Callback {
+    private final Callback assignmentDetailsCallback;
     private final long id;
     private final String name;
     private final long duedate;
 
-    public SetReminderCallback(CallbackAction assignmentDetailsCallback, long id, String name, long duedate) {
+    public SetReminderCallback(Callback assignmentDetailsCallback, long id, String name, long duedate) {
         this.assignmentDetailsCallback = assignmentDetailsCallback;
         this.id = id;
         this.name = name;
@@ -63,7 +63,7 @@ public class SetReminderCallback implements CallbackAction {
         }
     }
 
-    private class ActuallySetReminderCallback implements CallbackAction {
+    private class ActuallySetReminderCallback implements Callback {
         private final long epochSecond;
         private final String message;
 

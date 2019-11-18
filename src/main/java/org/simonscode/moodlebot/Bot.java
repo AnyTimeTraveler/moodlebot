@@ -6,41 +6,59 @@ import org.simonscode.moodlebot.callbacks.CoursesCallback;
 import org.simonscode.moodlebot.callbacks.LogoutCallback;
 import org.simonscode.moodlebot.reminders.ReminderManager;
 import org.simonscode.moodlebot.reminders.callbacks.RemindersCallback;
-import org.simonscode.telegrammenulibrary.GotoCallback;
-import org.simonscode.telegrammenulibrary.UpdateHook;
-import org.simonscode.telegrammenulibrary.VerticalMenu;
+import org.simonscode.telegrammenulibrary.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Bot extends TelegramLongPollingBot {
 
-    private static final String PATHNAME = "moodlebotconfig.json";
+    private static SimpleMenu mainMenu = new SimpleMenu();
+    private static GotoCallback mainMenuCallback = new GotoCallback(mainMenu);
+    private static List<List<MenuButton>> loggedInMarkup = new LinkedList<>();
+    private static List<List<MenuButton>> loggedOutMarkup = new LinkedList<>();
 
-    public Bot() {
-        try {
-            if (new File(PATHNAME).exists()) {
-                State.load(PATHNAME);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ReminderManager.restartReminders(this);
+    static {
+        loggedInMarkup.add(Collections.singletonList(new CallbackButton("Outstanding Assignments", new AssignmentsCallback(mainMenuCallback))));
+        loggedInMarkup.add(Collections.singletonList(new CallbackButton("Favorite Courses", new CoursesCallback(mainMenuCallback, true))));
+        loggedInMarkup.add(Collections.singletonList(new CallbackButton("Courses", new CoursesCallback(mainMenuCallback, false))));
+        loggedInMarkup.add(Collections.singletonList(new CallbackButton("Reminders", new RemindersCallback(mainMenuCallback))));
+        loggedInMarkup.add(Collections.singletonList(new CallbackButton("Logout", new LogoutCallback())));
+        loggedOutMarkup.add(Collections.singletonList(new CallbackButton("Login", new LoginCallback(mainMenuCallback))));
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                State.save(PATHNAME);
+                State.save();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }));
 
+        UpdateHook.setCleanupSchedule(
+                Duration.of(1, ChronoUnit.HOURS),
+                Duration.of(12, ChronoUnit.HOURS));
+    }
+
+    public Bot() {
         try {
-            State.save(PATHNAME);
+            State.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ReminderManager.restartReminders(this);
+
+        try {
+            State.save();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,25 +74,17 @@ public class Bot extends TelegramLongPollingBot {
                 if (!State.instance.users.containsKey(message.getFrom().getId())) {
                     State.instance.users.put(message.getFrom().getId(), new UserData());
                 }
-                VerticalMenu mainMenu = new VerticalMenu();
-                GotoCallback mainMenuCallback = new GotoCallback(mainMenu);
+
                 final UserData userData = State.instance.users.get(message.getFrom().getId());
                 if (userData != null && userData.getToken() != null && !userData.getToken().isBlank()) {
-                    mainMenu.setText("*MoodleBot*\n" +
-                            "Status: logged in");
-                    mainMenu.addButton("Outstanding Assignments", new AssignmentsCallback(mainMenuCallback));
-                    mainMenu.addButton("Favorite Courses", new CoursesCallback(mainMenuCallback, true));
-                    mainMenu.addButton("Courses", new CoursesCallback(mainMenuCallback, false));
-                    mainMenu.addButton("Reminders", new RemindersCallback(mainMenuCallback));
-                    mainMenu.addButton("Logout", new LogoutCallback());
+                    mainMenu.setText("Status: logged in");
+                    mainMenu.setMarkup(loggedInMarkup);
                 } else {
                     mainMenu.setText("Status: not logged in");
-                    mainMenu.addButton("Login", new LoginCallback(mainMenuCallback));
+                    mainMenu.setMarkup(loggedOutMarkup);
                 }
                 try {
-                    this.execute(mainMenu.generateSendMessage()
-                            .setChatId(message.getChatId())
-                    );
+                    this.execute(mainMenu.generateSendMessage(message.getChatId()));
                 } catch (TelegramApiException e) {
                     e.printStackTrace();
                 }
@@ -124,7 +134,7 @@ public class Bot extends TelegramLongPollingBot {
     public void onClosing() {
         super.onClosing();
         try {
-            State.save(PATHNAME);
+            State.save();
         } catch (IOException e) {
             e.printStackTrace();
         }

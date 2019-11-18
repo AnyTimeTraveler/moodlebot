@@ -3,16 +3,16 @@ package org.simonscode.moodlebot.reminders.callbacks;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.reminders.Reminder;
-import org.simonscode.telegrammenulibrary.CallbackAction;
+import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class RemindersCallback implements CallbackAction {
-    private final CallbackAction mainMenuCallback;
+public class RemindersCallback implements Callback {
+    private final Callback mainMenuCallback;
 
-    public RemindersCallback(CallbackAction mainMenuCallback) {
+    public RemindersCallback(Callback mainMenuCallback) {
         this.mainMenuCallback = mainMenuCallback;
     }
 
