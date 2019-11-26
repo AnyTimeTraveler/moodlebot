@@ -46,7 +46,7 @@ public class AssignmentDetailsCallback implements CallbackAction {
 
         if (assignment.getNosubmissions() == 0) {
             menu.addButton("Set reminder", new SetReminderCallback(this, assignment.getId(), assignment.getName(), assignment.getDuedate()));
-            menu.addButton("Submit", new SendMessageCallback("Not implemented, yet!"));
+            menu.addButton("Submit", new SendFileCallback(assignment.getId(), menu, userData.getToken()));
         }
         menu.addButton("Go back", assignmentsCallback);
         try {
