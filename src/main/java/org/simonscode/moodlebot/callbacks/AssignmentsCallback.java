@@ -1,7 +1,7 @@
 package org.simonscode.moodlebot.callbacks;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.simonscode.moodleapi.Requests;
+import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodleapi.objects.assignment.AssignmentReply;
 import org.simonscode.moodleapi.objects.assignment.AssignmentSummary;
 import org.simonscode.moodleapi.objects.assignment.CourseStub;
@@ -9,10 +9,12 @@ import org.simonscode.moodleapi.objects.course.Course;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.Utils;
-import org.simonscode.telegrammenulibrary.CallbackAction;
+import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.GotoCallback;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
+import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -22,26 +24,32 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class AssignmentsCallback implements CallbackAction {
-    private final CallbackAction mainMenuCallback;
+public class AssignmentsCallback implements Callback {
+    private final Callback mainMenuCallback;
 
-    public AssignmentsCallback(CallbackAction mainMenuCallback) {
+    public AssignmentsCallback(Callback mainMenuCallback) {
         this.mainMenuCallback = mainMenuCallback;
     }
 
     @Override
     public void execute(AbsSender bot, CallbackQuery callbackQuery) {
+        try {
+            bot.execute(new SendChatAction().setChatId(callbackQuery.getMessage().getChatId()).setAction(ActionType.TYPING));
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
         VerticalMenu menu = new VerticalMenu();
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
+        AssignmentReply assignments = null;
         try {
-            Course[] courses = Requests.getCourses(userData.getToken(), userData.getUserInfo().getUserid());
+            final Course[] courses = MoodleAPI.getCourses(userData.getToken(), userData.getUserInfo().getUserid());
             if (courses != null) {
                 final StringBuilder sb = new StringBuilder();
                 sb.append("Assignments for ");
                 sb.append(userData.getUserInfo().getFullname());
                 sb.append(":\n\n");
                 List<Long> courseIds = Arrays.stream(courses).mapToLong(Course::getId).boxed().collect(Collectors.toList());
-                final AssignmentReply assignments = Requests.getAssignments(userData.getToken(), courseIds);
+                assignments = MoodleAPI.getAssignments(userData.getToken(), courseIds);
                 for (CourseStub courseStub : assignments.getCourses()) {
                     long current = System.currentTimeMillis();
                     final List<AssignmentSummary> relevantAssignments = Arrays.stream(courseStub.getAssignments())
@@ -49,9 +57,9 @@ public class AssignmentsCallback implements CallbackAction {
                             .sorted(Comparator.comparingLong(AssignmentSummary::getDuedate))
                             .collect(Collectors.toList());
                     if (!relevantAssignments.isEmpty()) {
-                        sb.append("<b>");
+                        sb.append('*');
                         sb.append(courseStub.getFullname());
-                        sb.append(":</b>\n");
+                        sb.append(":*\n");
                         for (AssignmentSummary assignment : relevantAssignments) {
                             sb.append(" - ");
                             sb.append(assignment.getName());
@@ -72,9 +80,12 @@ public class AssignmentsCallback implements CallbackAction {
         }
         menu.addButton("Go back", mainMenuCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.MARKDOWN));
         } catch (TelegramApiException e) {
             e.printStackTrace();
+        }
+        if (assignments != null) {
+            new AddInfoToAssignemntsCallback(mainMenuCallback, assignments).execute(bot, callbackQuery);
         }
     }
 }

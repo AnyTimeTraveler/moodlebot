@@ -2,15 +2,15 @@ package org.simonscode.moodlebot.reminders.callbacks;
 
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.reminders.Reminder;
-import org.simonscode.telegrammenulibrary.CallbackAction;
+import org.simonscode.telegrammenulibrary.Callback;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
-public class RemoveReminderCallback implements CallbackAction {
-    private final CallbackAction remindersCallback;
+public class RemoveReminderCallback implements Callback {
+    private final Callback remindersCallback;
     private final Reminder reminder;
 
-    public RemoveReminderCallback(CallbackAction remindersCallback, Reminder reminder) {
+    public RemoveReminderCallback(Callback remindersCallback, Reminder reminder) {
         this.remindersCallback = remindersCallback;
         this.reminder = reminder;
     }

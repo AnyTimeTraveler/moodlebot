@@ -7,10 +7,7 @@ import org.simonscode.moodlebot.callbacks.LogoutCallback;
 import org.simonscode.moodlebot.callbacks.SendFileCallback;
 import org.simonscode.moodlebot.reminders.ReminderManager;
 import org.simonscode.moodlebot.reminders.callbacks.RemindersCallback;
-import org.simonscode.telegrammenulibrary.GotoCallback;
-import org.simonscode.telegrammenulibrary.MenuButton;
-import org.simonscode.telegrammenulibrary.SimpleMenu;
-import org.simonscode.telegrammenulibrary.UpdateHook;
+import org.simonscode.telegrammenulibrary.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -76,7 +73,9 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        UpdateHook.onUpdateReceived(this, update);
+        if (UpdateHook.onUpdateReceived(this, update)) {
+            return;
+        }
 
         final Message message = update.getMessage();
         if (!update.hasMessage()) {

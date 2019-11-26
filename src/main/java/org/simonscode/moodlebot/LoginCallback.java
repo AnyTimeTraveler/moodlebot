@@ -1,12 +1,12 @@
 package org.simonscode.moodlebot;
 
 import org.simonscode.moodlebot.callbacks.SendMessageCallback;
-import org.simonscode.telegrammenulibrary.CallbackAction;
+import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.GotoCallback;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 
-public class LoginCallback implements CallbackAction {
+public class LoginCallback implements Callback {
     public LoginCallback(GotoCallback mainMenu) {
     }
 

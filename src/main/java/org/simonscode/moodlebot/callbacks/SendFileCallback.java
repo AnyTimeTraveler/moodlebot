@@ -1,6 +1,5 @@
 package org.simonscode.moodlebot.callbacks;
 
-import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodlebot.Bot;
 import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.Menu;
@@ -25,6 +24,7 @@ public class SendFileCallback implements Callback {
 
     @Override
     public void execute(AbsSender bot, CallbackQuery callbackQuery) {
+
         Bot.addSendFileCallback(callbackQuery.getMessage().getChatId(), this);
         try {
             bot.execute(new EditMessageText()
@@ -40,7 +40,7 @@ public class SendFileCallback implements Callback {
     public void fileSent(AbsSender bot, Message message) {
         try {
             final File sentFile = bot.execute(new GetFile().setFileId(message.getDocument().getFileId()));
-            MoodleAPI.sendFile(token, sentFile.);
+//            MoodleAPI.sendFile(token, );
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

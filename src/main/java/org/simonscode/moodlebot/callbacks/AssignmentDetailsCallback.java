@@ -1,13 +1,13 @@
 package org.simonscode.moodlebot.callbacks;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
-import org.simonscode.moodleapi.Requests;
+import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodleapi.objects.assignment.AssignmentStatus;
 import org.simonscode.moodleapi.objects.assignment.AssignmentSummary;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.reminders.callbacks.SetReminderCallback;
-import org.simonscode.telegrammenulibrary.CallbackAction;
+import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -16,11 +16,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import static org.simonscode.moodlebot.Utils.getTimeLeft;
 
-public class AssignmentDetailsCallback implements CallbackAction {
-    private final CallbackAction assignmentsCallback;
+public class AssignmentDetailsCallback implements Callback {
+    private final Callback assignmentsCallback;
     private final AssignmentSummary assignment;
 
-    public AssignmentDetailsCallback(CallbackAction assignmentsCallback, AssignmentSummary assignment) {
+    public AssignmentDetailsCallback(Callback assignmentsCallback, AssignmentSummary assignment) {
         this.assignmentsCallback = assignmentsCallback;
         this.assignment = assignment;
     }
@@ -30,7 +30,7 @@ public class AssignmentDetailsCallback implements CallbackAction {
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         AssignmentStatus assignmentStatus = null;
         try {
-            assignmentStatus = Requests.getAssignmentStatus(userData.getToken(), userData.getUserInfo().getUserid(), assignment.getId());
+            assignmentStatus = MoodleAPI.getAssignmentStatus(userData.getToken(), userData.getUserInfo().getUserid(), assignment.getId());
         } catch (UnirestException e) {
             e.printStackTrace();
         }
@@ -44,6 +44,7 @@ public class AssignmentDetailsCallback implements CallbackAction {
                 "Time left: " + getTimeLeft(assignment.getDuedate()) + '\n'
                 + getExtraInfo(assignmentStatus));
 
+        menu.addButton("Set reminder", new SetReminderCallback(this, assignment.getId(), assignment.getName(), assignment.getDuedate()));
         if (assignment.getNosubmissions() == 0) {
             menu.addButton("Set reminder", new SetReminderCallback(this, assignment.getId(), assignment.getName(), assignment.getDuedate()));
             menu.addButton("Submit", new SendFileCallback(assignment.getId(), menu, userData.getToken()));
@@ -58,9 +59,10 @@ public class AssignmentDetailsCallback implements CallbackAction {
 
     private String getExtraInfo(AssignmentStatus status) {
         if (status == null || status.getLastattempt() == null) {
-            return "Grade: Not graded";
+            return "Status: unknown";
         }
-        return "Grade: " + status.getLastattempt().getGradingstatus() + '\n'
-                + "Extension: " + getTimeLeft(status.getLastattempt().getExtensionduedate());
+        return "Status: " + status.getLastattempt().getGradingstatus() + '\n' +
+                "Locked:" + status.getLastattempt().isLocked() + '\n' +
+                "Extension: " + (status.getLastattempt().getExtensionduedate() == 0 ? "no" : "yes") + '\n';
     }
 }
