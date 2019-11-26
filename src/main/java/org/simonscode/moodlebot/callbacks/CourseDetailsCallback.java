@@ -48,8 +48,11 @@ public class CourseDetailsCallback implements Callback {
                     } else if (module instanceof ForumModule || module instanceof UrlModule) {
                         menu.addButton(module.getName(), new TextMenuCallback(this, "URL:" + module.getUrl()));
                     } else if (module instanceof ResourceModule) {
-                        ResourceModule resourceModule = (ResourceModule) module;
-                        menu.addButton(resourceModule.getName(), new RessourcesMenuCallback(this, resourceModule));
+                        if (((ResourceModule) module).getContents().size() == 1) {
+                            menu.addButton(module.getName(), new DownloadCallback(callbackQuery.getMessage().getChatId(), userData.getToken(), ((ResourceModule) module).getContents().get(0)));
+                        } else {
+                            menu.addButton(module.getName(), new ResourcesMenuCallback(this, (ResourceModule) module));
+                        }
                     } else if (module instanceof AssignmentModule) {
                         menu.addButton(module.getName(), new TextMenuCallback(this, module.toString()));
                     } else if (module instanceof ChoiceGroupModule) {

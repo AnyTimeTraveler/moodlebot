@@ -12,11 +12,11 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class RessourcesMenuCallback implements Callback {
+public class ResourcesMenuCallback implements Callback {
     private final Callback callback;
     private final ResourceModule resourceModule;
 
-    public RessourcesMenuCallback(Callback callback, ResourceModule resourceModule) {
+    public ResourcesMenuCallback(Callback callback, ResourceModule resourceModule) {
         this.callback = callback;
         this.resourceModule = resourceModule;
     }

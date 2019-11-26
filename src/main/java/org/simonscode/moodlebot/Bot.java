@@ -66,7 +66,9 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        UpdateHook.onUpdateReceived(this, update);
+        if (UpdateHook.onUpdateReceived(this, update)) {
+            return;
+        }
 
         final Message message = update.getMessage();
         if (update.hasMessage() && message.hasText()) {
