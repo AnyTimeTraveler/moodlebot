@@ -85,7 +85,7 @@ public class Bot extends TelegramLongPollingBot {
         if (message.hasDocument()) {
             final SendFileCallback sendFileCallback = fileUploadCallbacks.remove(message.getChatId());
             if (sendFileCallback != null) {
-                sendFileCallback.fileSent(this, message);
+                sendFileCallback.fileSent(this, message, getBotToken());
             }
         }
 

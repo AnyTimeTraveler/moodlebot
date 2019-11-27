@@ -7,7 +7,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
 public class Main {
     public static void main(String[] args) throws TelegramApiRequestException {
-        MoodleAPI.setMoodleAddress("https://moodle.hs-emden-leer.de/moodle");
+//        MoodleAPI.setMoodleAddresses("https://moodle.hs-emden-leer.de/moodle","moodle.hs-emden-leer.de");
+        MoodleAPI.setMoodleAddresses("http://10.3.14.123", "10.3.14.123");
         ApiContextInitializer.init();
         TelegramBotsApi api = new TelegramBotsApi();
         api.registerBot(new Bot());

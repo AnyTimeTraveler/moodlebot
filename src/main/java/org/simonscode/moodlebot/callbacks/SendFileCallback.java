@@ -1,20 +1,28 @@
 package org.simonscode.moodlebot.callbacks;
 
+import com.mashape.unirest.http.exceptions.UnirestException;
+import org.simonscode.moodleapi.MoodleAPI;
+import org.simonscode.moodleapi.objects.SentFileResponse;
 import org.simonscode.moodlebot.Bot;
+import org.simonscode.moodlebot.Utils;
 import org.simonscode.telegrammenulibrary.Callback;
+import org.simonscode.telegrammenulibrary.GotoCallback;
 import org.simonscode.telegrammenulibrary.Menu;
-import org.telegram.telegrambots.meta.api.methods.GetFile;
+import org.simonscode.telegrammenulibrary.VerticalMenu;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import org.telegram.telegrambots.meta.api.objects.File;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class SendFileCallback implements Callback {
     private final long assignmentId;
     private final Menu previousMenu;
     private final String token;
+    private Integer messageId;
 
     public SendFileCallback(long assignmentId, Menu previousMenu, String token) {
         this.assignmentId = assignmentId;
@@ -24,23 +32,34 @@ public class SendFileCallback implements Callback {
 
     @Override
     public void execute(AbsSender bot, CallbackQuery callbackQuery) {
-
         Bot.addSendFileCallback(callbackQuery.getMessage().getChatId(), this);
         try {
-            bot.execute(new EditMessageText()
+            final Message execute = (Message) bot.execute(new EditMessageText()
                     .setMessageId(callbackQuery.getMessage().getMessageId())
                     .setChatId(callbackQuery.getMessage().getChatId())
                     .setText("Ready to receive file...")
             );
+            messageId = execute.getMessageId();
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
     }
 
-    public void fileSent(AbsSender bot, Message message) {
+    public void fileSent(AbsSender bot, Message message, String botToken) {
         try {
-            final File sentFile = bot.execute(new GetFile().setFileId(message.getDocument().getFileId()));
-//            MoodleAPI.sendFile(token, );
+            VerticalMenu menu = new VerticalMenu();
+            try {
+                InputStream is = Utils.getFileInputStream(bot, message.getDocument().getFileId(), botToken);
+                final SentFileResponse[] sentFileResponses = MoodleAPI.sendFile(token, is, message.getDocument().getFileName());
+                if (sentFileResponses.length == 1) {
+                    MoodleAPI.assignFileToAssignment(token, assignmentId, sentFileResponses[0].getItemid());
+                    menu.setText("File submitted successfully!");
+                }
+            } catch (UnirestException | IOException e) {
+                e.printStackTrace();
+                menu.setText("Something went wrong!\n" + e.getMessage());
+            }
+            menu.addButton("Go back", new GotoCallback(previousMenu));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
