@@ -44,7 +44,6 @@ public class AssignmentDetailsCallback implements Callback {
                 "Time left: " + getTimeLeft(assignment.getDuedate()) + '\n'
                 + getExtraInfo(assignmentStatus));
 
-        menu.addButton("Set reminder", new SetReminderCallback(this, assignment.getId(), assignment.getName(), assignment.getDuedate()));
         if (assignment.getNosubmissions() == 0) {
             menu.addButton("Set reminder", new SetReminderCallback(this, assignment.getId(), assignment.getName(), assignment.getDuedate()));
             menu.addButton("Submit", new SendFileCallback(assignment.getId(), menu, userData.getToken()));
