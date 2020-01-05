@@ -37,7 +37,7 @@ public class AssignmentDetailsCallback implements Callback {
 
         VerticalMenu menu = new VerticalMenu();
 
-        menu.setText('*' + assignment.getName() + "*\n" +
+        menu.setText("<b>" + assignment.getName() + "</b>\n" +
                 "Max attempts: " + assignment.getMaxattempts() + '\n' +
                 "Team submission: " + (assignment.getTeamsubmission() == 1 ? "yes" : "no") + '\n' +
                 "Submissions allowed: " + (assignment.getNosubmissions() == 0 ? "yes" : "no") + '\n' +
@@ -51,7 +51,7 @@ public class AssignmentDetailsCallback implements Callback {
         }
         menu.addButton("Go back", assignmentsCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.MARKDOWN));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

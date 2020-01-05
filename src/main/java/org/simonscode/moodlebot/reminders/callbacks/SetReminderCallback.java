@@ -57,7 +57,7 @@ public class SetReminderCallback implements Callback {
 
         menu.addButton("Go back", assignmentDetailsCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.MARKDOWN));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

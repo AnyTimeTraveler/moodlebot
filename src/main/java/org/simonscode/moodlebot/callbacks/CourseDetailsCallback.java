@@ -36,7 +36,7 @@ public class CourseDetailsCallback implements Callback {
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         VerticalMenu menu = new VerticalMenu();
 
-        menu.setText('*' + course.getFullname() + "*\n" +
+        menu.setText("<b>" + course.getFullname() + "</b>\n" +
                 "Studenten: " + course.getEnrolledusercount());
         try {
             final CourseContent[] courseDetails = MoodleAPI.getCourseDetails(userData.getToken(), course.getId());
@@ -70,7 +70,7 @@ public class CourseDetailsCallback implements Callback {
 
         menu.addButton("Go back", coursesCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.MARKDOWN));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

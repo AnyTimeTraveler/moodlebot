@@ -57,9 +57,9 @@ public class AssignmentsCallback implements Callback {
                             .sorted(Comparator.comparingLong(AssignmentSummary::getDuedate))
                             .collect(Collectors.toList());
                     if (!relevantAssignments.isEmpty()) {
-                        sb.append('*');
+                        sb.append("<b>");
                         sb.append(courseStub.getFullname());
-                        sb.append(":*\n");
+                        sb.append(":</b>\n");
                         for (AssignmentSummary assignment : relevantAssignments) {
                             sb.append(" - ");
                             sb.append(assignment.getName());
@@ -80,7 +80,7 @@ public class AssignmentsCallback implements Callback {
         }
         menu.addButton("Go back", mainMenuCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.MARKDOWN));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
