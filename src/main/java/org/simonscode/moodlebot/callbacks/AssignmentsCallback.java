@@ -11,9 +11,9 @@ import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.Utils;
 import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.GotoCallback;
+import org.simonscode.telegrammenulibrary.ParseMode;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
 import org.telegram.telegrambots.meta.api.methods.ActionType;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
@@ -39,6 +39,8 @@ public class AssignmentsCallback implements Callback {
             e.printStackTrace();
         }
         VerticalMenu menu = new VerticalMenu();
+        menu.setParseMode(ParseMode.HTML);
+
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         AssignmentReply assignments = null;
         try {
@@ -80,7 +82,7 @@ public class AssignmentsCallback implements Callback {
         }
         menu.addButton("Go back", mainMenuCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

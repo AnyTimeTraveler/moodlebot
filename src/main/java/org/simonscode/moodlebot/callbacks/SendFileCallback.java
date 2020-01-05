@@ -5,10 +5,7 @@ import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodleapi.objects.SentFileResponse;
 import org.simonscode.moodlebot.Bot;
 import org.simonscode.moodlebot.Utils;
-import org.simonscode.telegrammenulibrary.Callback;
-import org.simonscode.telegrammenulibrary.GotoCallback;
-import org.simonscode.telegrammenulibrary.Menu;
-import org.simonscode.telegrammenulibrary.VerticalMenu;
+import org.simonscode.telegrammenulibrary.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -22,7 +19,7 @@ public class SendFileCallback implements Callback {
     private final long assignmentId;
     private final Menu previousMenu;
     private final String token;
-    private Integer messageId;
+    private Message statusMessage;
 
     public SendFileCallback(long assignmentId, Menu previousMenu, String token) {
         this.assignmentId = assignmentId;
@@ -34,12 +31,11 @@ public class SendFileCallback implements Callback {
     public void execute(AbsSender bot, CallbackQuery callbackQuery) {
         Bot.addSendFileCallback(callbackQuery.getMessage().getChatId(), this);
         try {
-            final Message execute = (Message) bot.execute(new EditMessageText()
+            statusMessage = (Message) bot.execute(new EditMessageText()
                     .setMessageId(callbackQuery.getMessage().getMessageId())
                     .setChatId(callbackQuery.getMessage().getChatId())
                     .setText("Ready to receive file...")
             );
-            messageId = execute.getMessageId();
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -48,6 +44,8 @@ public class SendFileCallback implements Callback {
     public void fileSent(AbsSender bot, Message message, String botToken) {
         try {
             VerticalMenu menu = new VerticalMenu();
+            menu.setParseMode(ParseMode.HTML);
+
             try {
                 InputStream is = Utils.getFileInputStream(bot, message.getDocument().getFileId(), botToken);
                 final SentFileResponse[] sentFileResponses = MoodleAPI.sendFile(token, is, message.getDocument().getFileName());
@@ -60,6 +58,7 @@ public class SendFileCallback implements Callback {
                 menu.setText("Something went wrong!\n" + e.getMessage());
             }
             menu.addButton("Go back", new GotoCallback(previousMenu));
+            bot.execute(menu.generateEditMessage(statusMessage));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

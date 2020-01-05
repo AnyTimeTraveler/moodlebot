@@ -8,8 +8,8 @@ import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.reminders.callbacks.SetReminderCallback;
 import org.simonscode.telegrammenulibrary.Callback;
+import org.simonscode.telegrammenulibrary.ParseMode;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -36,6 +36,7 @@ public class AssignmentDetailsCallback implements Callback {
         }
 
         VerticalMenu menu = new VerticalMenu();
+        menu.setParseMode(ParseMode.HTML);
 
         menu.setText("<b>" + assignment.getName() + "</b>\n" +
                 "Max attempts: " + assignment.getMaxattempts() + '\n' +
@@ -50,7 +51,7 @@ public class AssignmentDetailsCallback implements Callback {
         }
         menu.addButton("Go back", assignmentsCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

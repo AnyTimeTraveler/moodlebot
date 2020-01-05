@@ -9,8 +9,8 @@ import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.Utils;
 import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.GotoCallback;
+import org.simonscode.telegrammenulibrary.ParseMode;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -33,6 +33,7 @@ public class AddInfoToAssignemntsCallback implements Callback {
     @Override
     public void execute(AbsSender bot, CallbackQuery callbackQuery) {
         VerticalMenu menu = new VerticalMenu();
+        menu.setParseMode(ParseMode.HTML);
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
 
         final StringBuilder sb = new StringBuilder();
@@ -106,7 +107,7 @@ public class AddInfoToAssignemntsCallback implements Callback {
 
         menu.addButton("Go back", mainMenuCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

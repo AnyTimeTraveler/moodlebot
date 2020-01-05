@@ -4,8 +4,8 @@ import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.reminders.ReminderManager;
 import org.simonscode.telegrammenulibrary.Callback;
+import org.simonscode.telegrammenulibrary.ParseMode;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -33,6 +33,7 @@ public class SetReminderCallback implements Callback {
         final Duration between = Duration.between(Instant.now(), Instant.ofEpochSecond(duedate));
 
         VerticalMenu menu = new VerticalMenu();
+        menu.setParseMode(ParseMode.HTML);
 
         menu.setText("Please tab the reminders you'd like to add:");
 
@@ -57,7 +58,7 @@ public class SetReminderCallback implements Callback {
 
         menu.addButton("Go back", assignmentDetailsCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.HTML));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
