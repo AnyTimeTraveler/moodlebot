@@ -2,10 +2,8 @@ package org.simonscode.moodlebot.callbacks;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.simonscode.moodleapi.MoodleAPI;
-import org.simonscode.moodleapi.objects.assignment.AssignmentReply;
-import org.simonscode.moodleapi.objects.assignment.AssignmentStatus;
-import org.simonscode.moodleapi.objects.assignment.AssignmentSummary;
-import org.simonscode.moodleapi.objects.assignment.CourseStub;
+import org.simonscode.moodleapi.objects.assignment.*;
+import org.simonscode.moodleapi.objects.assignment.submission.Submission;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.Utils;
@@ -20,6 +18,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AddInfoToAssignemntsCallback implements Callback {
@@ -59,6 +58,18 @@ public class AddInfoToAssignemntsCallback implements Callback {
                     }
                     sb.append(" - ");
                     sb.append(assignment.getName());
+                    if (assignmentStatus != null) {
+                        Optional.of(assignmentStatus)
+                                .map(AssignmentStatus::getLastattempt)
+                                .map(Attempt::getSubmission)
+                                .map(Submission::getStatus)
+                                .ifPresent(
+                                        status -> {
+                                            sb.append("\n   Status: ");
+                                            sb.append(status);
+                                        }
+                                );
+                    }
                     sb.append("\n   Remaining Time: ");
                     sb.append(Utils.getTimeLeft(assignment.getDuedate()));
                     if (assignmentStatus != null && assignmentStatus.getLastattempt() != null) {
