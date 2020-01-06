@@ -71,7 +71,7 @@ public class CourseDetailsCallback implements Callback {
                 if (((ResourceModule) module).getContents().size() == 1) {
                     menu.addButton(module.getName(), new DownloadCallback(callbackQuery.getMessage().getChatId(), userData.getToken(), ((ResourceModule) module).getContents().get(0)));
                 } else {
-                    menu.addButton(module.getName(), new ResourcesMenuCallback(this, (ResourceModule) module));
+                    menu.addButton(module.getName(), new ResourcesMenuCallback(this, userData.getToken(), (ResourceModule) module));
                 }
             } else if (module instanceof AssignmentModule) {
                 menu.addButton(module.getName(), new TextMenuCallback(this, module.toString()));
