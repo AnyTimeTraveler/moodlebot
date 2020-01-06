@@ -2,6 +2,8 @@
 
 This bot allows basic everyday interaction with moodle.
 
+![Main menu](https://raw.githubusercontent.com/AnyTimeTraveler/moodlebot/master/res/bot.jpg)
+
 ## Features
  - Faster than the mobile app and the website
  - View outstanding assignments
