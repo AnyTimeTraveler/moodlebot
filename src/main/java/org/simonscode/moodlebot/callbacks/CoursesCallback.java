@@ -7,6 +7,7 @@ import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.GotoCallback;
+import org.simonscode.telegrammenulibrary.ParseMode;
 import org.simonscode.telegrammenulibrary.SimpleMenu;
 import org.telegram.telegrambots.meta.api.methods.ActionType;
 import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
@@ -31,6 +32,7 @@ public class CoursesCallback implements Callback {
             e.printStackTrace();
         }
         SimpleMenu menu = new SimpleMenu();
+        menu.setParseMode(ParseMode.HTML);
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
         try {
             Course[] courses = MoodleAPI.getCourses(userData.getToken(), userData.getUserInfo().getUserid());

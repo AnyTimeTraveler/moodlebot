@@ -12,12 +12,14 @@ import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class RessourcesMenuCallback implements Callback {
+public class ResourcesMenuCallback implements Callback {
     private final Callback callback;
+    private final String token;
     private final ResourceModule resourceModule;
 
-    public RessourcesMenuCallback(Callback callback, ResourceModule resourceModule) {
+    public ResourcesMenuCallback(Callback callback, String token, ResourceModule resourceModule) {
         this.callback = callback;
+        this.token = token;
         this.resourceModule = resourceModule;
     }
 
@@ -28,7 +30,7 @@ public class RessourcesMenuCallback implements Callback {
         for (ModuleContent content : resourceModule.getContents()) {
             if (content instanceof FileContent) {
                 FileContent fileContent = (FileContent) content;
-                menu.addButton(new URLButton(fileContent.getFilename(), fileContent.getFileurl()));
+                menu.addButton(fileContent.getFilename(), new DownloadCallback(callbackQuery.getMessage().getChatId(), token, fileContent));
             } else if (content instanceof URLContent) {
                 URLContent urlContent = (URLContent) content;
                 menu.addButton(new URLButton(urlContent.getFilename(), urlContent.getFileurl()));

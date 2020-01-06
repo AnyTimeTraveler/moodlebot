@@ -2,17 +2,15 @@ package org.simonscode.moodlebot.callbacks;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.simonscode.moodleapi.MoodleAPI;
-import org.simonscode.moodleapi.objects.assignment.AssignmentReply;
-import org.simonscode.moodleapi.objects.assignment.AssignmentStatus;
-import org.simonscode.moodleapi.objects.assignment.AssignmentSummary;
-import org.simonscode.moodleapi.objects.assignment.CourseStub;
+import org.simonscode.moodleapi.objects.assignment.*;
+import org.simonscode.moodleapi.objects.assignment.submission.Submission;
 import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.Utils;
 import org.simonscode.telegrammenulibrary.Callback;
 import org.simonscode.telegrammenulibrary.GotoCallback;
+import org.simonscode.telegrammenulibrary.ParseMode;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -20,6 +18,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class AddInfoToAssignemntsCallback implements Callback {
@@ -34,6 +33,7 @@ public class AddInfoToAssignemntsCallback implements Callback {
     @Override
     public void execute(AbsSender bot, CallbackQuery callbackQuery) {
         VerticalMenu menu = new VerticalMenu();
+        menu.setParseMode(ParseMode.HTML);
         final UserData userData = State.instance.users.get(callbackQuery.getFrom().getId());
 
         final StringBuilder sb = new StringBuilder();
@@ -47,9 +47,9 @@ public class AddInfoToAssignemntsCallback implements Callback {
                     .sorted(Comparator.comparingLong(AssignmentSummary::getDuedate))
                     .collect(Collectors.toList());
             if (!relevantAssignments.isEmpty()) {
-                sb.append('*');
+                sb.append("<b>");
                 sb.append(courseStub.getFullname());
-                sb.append(":*\n");
+                sb.append(":</b>\n");
                 for (AssignmentSummary assignment : relevantAssignments) {
                     AssignmentStatus assignmentStatus = null;
                     try {
@@ -59,6 +59,18 @@ public class AddInfoToAssignemntsCallback implements Callback {
                     }
                     sb.append(" - ");
                     sb.append(assignment.getName());
+                    if (assignmentStatus != null) {
+                        Optional.of(assignmentStatus)
+                                .map(AssignmentStatus::getLastattempt)
+                                .map(Attempt::getSubmission)
+                                .map(Submission::getStatus)
+                                .ifPresent(
+                                        status -> {
+                                            sb.append("\n   Status: ");
+                                            sb.append(status);
+                                        }
+                                );
+                    }
                     sb.append("\n   Remaining Time: ");
                     sb.append(Utils.getTimeLeft(assignment.getDuedate()));
                     if (assignmentStatus != null && assignmentStatus.getLastattempt() != null) {
@@ -68,7 +80,7 @@ public class AddInfoToAssignemntsCallback implements Callback {
                         sb.append(assignmentStatus.getLastattempt().isGraded() ? "yes" : "no");
                         sb.append("\n   Grading status: ");
                         sb.append(assignmentStatus.getLastattempt().getGradingstatus());
-                        if (assignmentStatus.getLastattempt().getExtensionduedate() != 0){
+                        if (assignmentStatus.getLastattempt().getExtensionduedate() != 0) {
                             sb.append("\n   Time left for extension: ");
                             sb.append(Utils.getTimeLeft(assignmentStatus.getLastattempt().getExtensionduedate()));
                         }
@@ -95,7 +107,7 @@ public class AddInfoToAssignemntsCallback implements Callback {
 
         menu.addButton("Go back", mainMenuCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.MARKDOWN));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

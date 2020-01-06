@@ -8,8 +8,8 @@ import org.simonscode.moodlebot.State;
 import org.simonscode.moodlebot.UserData;
 import org.simonscode.moodlebot.reminders.callbacks.SetReminderCallback;
 import org.simonscode.telegrammenulibrary.Callback;
+import org.simonscode.telegrammenulibrary.ParseMode;
 import org.simonscode.telegrammenulibrary.VerticalMenu;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.bots.AbsSender;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -36,8 +36,9 @@ public class AssignmentDetailsCallback implements Callback {
         }
 
         VerticalMenu menu = new VerticalMenu();
+        menu.setParseMode(ParseMode.HTML);
 
-        menu.setText('*' + assignment.getName() + "*\n" +
+        menu.setText("<b>" + assignment.getName() + "</b>\n" +
                 "Max attempts: " + assignment.getMaxattempts() + '\n' +
                 "Team submission: " + (assignment.getTeamsubmission() == 1 ? "yes" : "no") + '\n' +
                 "Submissions allowed: " + (assignment.getNosubmissions() == 0 ? "yes" : "no") + '\n' +
@@ -46,11 +47,11 @@ public class AssignmentDetailsCallback implements Callback {
 
         if (assignment.getNosubmissions() == 0) {
             menu.addButton("Set reminder", new SetReminderCallback(this, assignment.getId(), assignment.getName(), assignment.getDuedate()));
-            menu.addButton("Submit", new SendMessageCallback("Not implemented, yet!"));
+            menu.addButton("Submit", new SendFileCallback(assignment.getId(), menu, userData.getToken()));
         }
         menu.addButton("Go back", assignmentsCallback);
         try {
-            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()).setParseMode(ParseMode.MARKDOWN));
+            bot.execute(menu.generateEditMessage(callbackQuery.getMessage()));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }

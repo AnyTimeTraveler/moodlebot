@@ -15,6 +15,8 @@ public class State {
     private static final String PATHNAME = "moodlebotconfig.json";
     public static State instance = new State();
 
+    public String moodleAddress = "https://moodle.hs-emden-leer.de/moodle";
+    public String moodleHost = "moodle.hs-emden-leer.de";
     public Map<Integer, UserData> users = new HashMap<>();
 
     static void load() throws IOException {

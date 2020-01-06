@@ -4,6 +4,7 @@ import org.simonscode.moodleapi.MoodleAPI;
 import org.simonscode.moodlebot.callbacks.AssignmentsCallback;
 import org.simonscode.moodlebot.callbacks.CoursesCallback;
 import org.simonscode.moodlebot.callbacks.LogoutCallback;
+import org.simonscode.moodlebot.callbacks.SendFileCallback;
 import org.simonscode.moodlebot.reminders.ReminderManager;
 import org.simonscode.moodlebot.reminders.callbacks.RemindersCallback;
 import org.simonscode.telegrammenulibrary.*;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class Bot extends TelegramLongPollingBot {
     private static GotoCallback mainMenuCallback = new GotoCallback(mainMenu);
     private static List<List<MenuButton>> loggedInMarkup = new LinkedList<>();
     private static List<List<MenuButton>> loggedOutMarkup = new LinkedList<>();
+    private static HashMap<Long, SendFileCallback> fileUploadCallbacks = new HashMap<>();
 
     static {
         loggedInMarkup.add(Collections.singletonList(new CallbackButton("Outstanding Assignments", new AssignmentsCallback(mainMenuCallback))));
@@ -64,12 +67,29 @@ public class Bot extends TelegramLongPollingBot {
         }
     }
 
+    public static void addSendFileCallback(Long chatId, SendFileCallback callback) {
+        fileUploadCallbacks.put(chatId, callback);
+    }
+
     @Override
     public void onUpdateReceived(Update update) {
-        UpdateHook.onUpdateReceived(this, update);
+        if (UpdateHook.onUpdateReceived(this, update)) {
+            return;
+        }
 
         final Message message = update.getMessage();
-        if (update.hasMessage() && message.hasText()) {
+        if (!update.hasMessage()) {
+            return;
+        }
+
+        if (message.hasDocument()) {
+            final SendFileCallback sendFileCallback = fileUploadCallbacks.remove(message.getChatId());
+            if (sendFileCallback != null) {
+                sendFileCallback.fileSent(this, message, getBotToken());
+            }
+        }
+
+        if (message.hasText()) {
             if (message.getText().startsWith("/start")) {
                 if (!State.instance.users.containsKey(message.getFrom().getId())) {
                     State.instance.users.put(message.getFrom().getId(), new UserData());
@@ -93,16 +113,17 @@ public class Bot extends TelegramLongPollingBot {
                 if (parts.length != 3) {
                     reply(message, "Invalid usage\n" +
                             "Usage: /login <username> <password>");
-                }
-                try {
-                    UserData userdata = new UserData();
-                    userdata.setToken(MoodleAPI.getToken(parts[1], parts[2]));
-                    userdata.setUserInfo(MoodleAPI.getUserInfo(userdata.getToken()));
-                    reply(message, (userdata.getToken() != null && !userdata.getToken().isEmpty()) ? "Login successful!" : "Login failed!");
-                    State.instance.users.put(message.getFrom().getId(), userdata);
-                } catch (Exception e) {
-                    reply(message, "Login failed!");
-                    e.printStackTrace();
+                } else {
+                    try {
+                        UserData userdata = new UserData();
+                        userdata.setToken(MoodleAPI.getToken(parts[1], parts[2]));
+                        userdata.setUserInfo(MoodleAPI.getUserInfo(userdata.getToken()));
+                        reply(message, (userdata.getToken() != null && !userdata.getToken().isEmpty()) ? "Login successful!" : "Login failed!");
+                        State.instance.users.put(message.getFrom().getId(), userdata);
+                    } catch (Exception e) {
+                        reply(message, "Login failed!");
+                        e.printStackTrace();
+                    }
                 }
             }
         }
